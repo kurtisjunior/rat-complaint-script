@@ -37,7 +37,7 @@ DESCRIPTIONS = [
     "Regular rodent sightings near improperly stored garbage and debris piles.",
 ]
 
-ADDITIONAL_DETAILS = "Outdoor, Structure (foundation, around perimeter)"
+ADDITIONAL_DETAILS = "Trash, Improper garbage storage or disposal, Open lot"
 
 # Default address (can be overridden via environment variables)
 DEFAULT_ADDRESS = "333 East 34th Street"
@@ -97,13 +97,26 @@ def save_debug_artifacts(page, error_name="error"):
 
 def ensure_no_captcha(page):
     """Fail fast if CAPTCHA is detected."""
-    captcha_element = page.locator(
-        "iframe[src*='recaptcha'], .g-recaptcha, #captcha, [class*='captcha']"
-    ).first
-    if captcha_element.count() > 0 and captcha_element.is_visible():
-        print("ERROR: CAPTCHA detected. Cannot proceed automatically.")
-        save_debug_artifacts(page, "captcha_detected")
-        raise Exception("CAPTCHA detected")
+    # Look for actual reCAPTCHA elements that are visible and have size
+    captcha_selectors = [
+        "iframe[src*='recaptcha']",
+        ".g-recaptcha",
+        "#captcha",
+        "[class*='recaptcha']",
+    ]
+    for selector in captcha_selectors:
+        captcha_element = page.locator(selector).first
+        if captcha_element.count() > 0:
+            try:
+                # Check if it's actually visible and has dimensions
+                if captcha_element.is_visible():
+                    box = captcha_element.bounding_box()
+                    if box and box['width'] > 50 and box['height'] > 50:
+                        print("ERROR: CAPTCHA detected. Cannot proceed automatically.")
+                        save_debug_artifacts(page, "captcha_detected")
+                        raise Exception("CAPTCHA detected")
+            except Exception:
+                pass  # Element not interactable, skip
 
 
 def wait_for_network_idle(page, timeout=10000):
@@ -227,14 +240,15 @@ def fill_step1_what(page, description, nyc_datetime):
         additional_details = None
 
     if additional_details and additional_details.count() > 0 and additional_details.is_visible():
-        # Try preferred options in order (outdoor-related for rat complaints)
+        # Try preferred options in order (trash/garbage-related for rat complaints)
         preferred_options = [
             ADDITIONAL_DETAILS,
-            "Outdoor",
-            "Outside",
-            "Exterior",
-            "Foundation",
-            "Perimeter",
+            "Trash",
+            "Garbage",
+            "Improper",
+            "Open lot",
+            "Food",
+            "Waste",
         ]
         selected = False
         for pref in preferred_options:
@@ -323,55 +337,147 @@ def fill_step2_where(page, config):
 
     wait_for_network_idle(page)
 
-    # Select Location Detail if present and visible
+    # Select Location Detail - required to enable the Address field
     location_detail = page.locator("#n311_locationdetailid_select")
-    if location_detail.count() > 0 and location_detail.is_visible():
-        location_detail.select_option(index=1)
-        print("  - Selected Location Detail")
+    if location_detail.count() > 0:
+        # Wait for Location Detail options to load
+        try:
+            page.wait_for_function(
+                "document.querySelector('#n311_locationdetailid_select option[value]:not([value=\"\"])') !== null",
+                timeout=10000
+            )
+            # Try to select appropriate option for building exterior
+            detail_options = ["Exterior", "Outside", "Sidewalk", "Street", "Front", "Building"]
+            selected = False
+            for opt in detail_options:
+                if location_detail.locator(f"option:has-text('{opt}')").count() > 0:
+                    location_detail.select_option(label=location_detail.locator(f"option:has-text('{opt}')").first.text_content())
+                    print(f"  - Selected Location Detail: {opt}")
+                    selected = True
+                    break
+            if not selected:
+                location_detail.select_option(index=1)
+                print("  - Selected Location Detail: (first available)")
+            wait_for_network_idle(page)
+            # Wait for address field to become enabled
+            page.wait_for_timeout(1000)
+        except PlaywrightTimeout:
+            print("  - Location Detail options did not load")
+
+    # Fill the Address lookup field
+    # Click the address search button (inside the form, not header)
+    search_btn = page.locator("#SelectAddressWhere, .address-picker-btn").first
+    expect(search_btn).to_be_visible(timeout=5000)
+    search_btn.click()
+    wait_for_network_idle(page)
+    print("  - Opened address search")
+
+    # Wait for modal/search input to appear - use the specific ID
+    modal_input = page.locator("#address-search-box-input").first
+    try:
+        modal_input.wait_for(state="visible", timeout=5000)
+
+        # Clear and focus the input field
+        modal_input.click()
+        # Triple-click to select all (works on all platforms)
+        modal_input.click(click_count=3)
+        page.wait_for_timeout(200)
+        modal_input.press("Backspace")  # Clear
+        page.wait_for_timeout(500)
+
+        # Type address slowly to trigger autocomplete
+        address_text = config['address']
+        modal_input.type(address_text, delay=100)  # Type with delay to trigger autocomplete
+        print(f"  - Typed address: {address_text}")
+        page.wait_for_timeout(1000)  # Wait for autocomplete to react
+
+        # Wait for autocomplete suggestions to appear
+        autocomplete_list = page.locator(".ui-autocomplete, .ui-menu").first
+        try:
+            autocomplete_list.wait_for(state="visible", timeout=5000)
+            print("  - Autocomplete suggestions appeared")
+
+            # Wait a moment for all suggestions to load
+            page.wait_for_timeout(500)
+
+            # Click on the first address suggestion (should match our typed address)
+            # Look for suggestions containing the street name in any borough
+            suggestions = page.locator(".ui-menu-item, .ui-autocomplete li").all()
+            selected_suggestion = False
+            for suggestion in suggestions:
+                text = suggestion.text_content() or ""
+                # Check if this looks like a valid address (contains STREET/ST and a borough)
+                boroughs = ["MANHATTAN", "BROOKLYN", "QUEENS", "BRONX", "STATEN ISLAND"]
+                if any(b in text.upper() for b in boroughs):
+                    suggestion.click()
+                    wait_for_network_idle(page)
+                    print(f"  - Selected address from autocomplete: {text.strip()}")
+                    page.wait_for_timeout(3000)  # Wait for map to update and zoom
+                    selected_suggestion = True
+                    break
+
+            if not selected_suggestion:
+                # Fallback: click the first suggestion
+                first_suggestion = page.locator(".ui-menu-item, .ui-autocomplete li").first
+                if first_suggestion.count() > 0:
+                    first_suggestion.click()
+                    wait_for_network_idle(page)
+                    print("  - Selected first autocomplete suggestion")
+                    page.wait_for_timeout(3000)
+        except PlaywrightTimeout:
+            print("  - No autocomplete suggestions, trying Enter key")
+            modal_input.press("Enter")
+            wait_for_network_idle(page)
+            page.wait_for_timeout(3000)
+
+        # Wait for "Select Address" button to become enabled
+        select_btn = page.locator("#SelectAddressMap").first
+        expect(select_btn).to_be_visible(timeout=5000)
+
+        # Wait for button to be enabled (not disabled)
+        try:
+            page.wait_for_function(
+                """() => {
+                    const btn = document.querySelector('#SelectAddressMap');
+                    return btn && !btn.disabled;
+                }""",
+                timeout=15000
+            )
+            print("  - Select Address button enabled")
+        except PlaywrightTimeout:
+            # Save debug info and try alternative approaches
+            save_debug_artifacts(page, "address_button_still_disabled")
+            print("  - WARNING: Select Address button still disabled")
+
+            # Try clicking on the map canvas to set a pin
+            map_canvas = page.locator(".modal canvas, .esri-view-surface canvas").first
+            if map_canvas.count() > 0:
+                # Click in the center of the map
+                box = map_canvas.bounding_box()
+                if box:
+                    page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+                    wait_for_network_idle(page)
+                    print("  - Clicked on map center")
+                    page.wait_for_timeout(2000)
+
+        select_btn.click()
         wait_for_network_idle(page)
+        print("  - Clicked Select Address")
 
-    # Look for address section - check if NYC/Non-NYC radio buttons appear
-    nyc_radio = page.locator("#n311_portaladdresstype_0")
-    if nyc_radio.count() > 0 and nyc_radio.is_visible():
-        nyc_radio.click()
-        print("  - Selected NYC Address")
-        wait_for_network_idle(page)
-
-    # Fill street address - try various possible fields
-    address_input = page.get_by_label("Street Address").first
-    if address_input.count() == 0:
-        address_input = page.locator("input[id*='address']:visible:not([readonly])").first
-    if address_input.count() > 0:
-        expect(address_input).to_be_visible(timeout=5000)
-        address_input.fill(config["address"])
-        address_input.press("Tab")
-        print(f"  - Filled Address: {config['address']}")
-        wait_for_network_idle(page)
-
-    # Fill City/State if visible (for non-NYC or optional fields)
-    city_input = page.get_by_label("City").first
-    if city_input.count() > 0 and city_input.is_visible():
-        city_input.fill(config["city"])
-        print(f"  - Filled City: {config['city']}")
-
-    state_input = page.get_by_label("State").first
-    if state_input.count() > 0 and state_input.is_visible():
-        state_input.fill(config["state"])
-        print(f"  - Filled State: {config['state']}")
-
-    # Fill Borough if dropdown is visible
-    borough = page.locator("select#n311_boroughid_select:visible").first
-    if borough.count() > 0:
-        borough.select_option(label="Manhattan")
-        print("  - Selected Borough: Manhattan")
-
-    # Fill Zip if visible
-    zip_input = page.get_by_label("Zip").first
-    if zip_input.count() == 0:
-        zip_input = page.locator("input#n311_zipcode:visible").first
-    if zip_input.count() > 0:
-        zip_input.fill(config["zip"])
-        print(f"  - Filled Zip: {config['zip']}")
+        # Wait for modal to close
+        page.wait_for_timeout(1000)
+    except PlaywrightTimeout as e:
+        save_debug_artifacts(page, "address_modal_failed")
+        # Try to close any open modal by clicking Cancel or X
+        cancel_btn = page.locator("#CancelButton, .modal button[data-dismiss='modal'], .modal .close").first
+        if cancel_btn.count() > 0:
+            try:
+                cancel_btn.click(timeout=2000)
+                wait_for_network_idle(page)
+            except:
+                pass
+        print(f"  - WARNING: Address search issue: {e}")
+        raise  # Re-raise to fail the step properly
 
     # Click Next and verify we reach Step 3
     wait_and_click_next(page, expected_next_step=3)
