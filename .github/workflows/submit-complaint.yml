@@ -33,11 +33,21 @@ jobs:
 
       - name: Notify success via ntfy
         if: success()
+        env:
+          ADDRESS: "932 Carroll St"
+          CITY: "Brooklyn"
+          STATE: "NY"
+          ZIP: "11225"
         run: |
           curl -s \
             -H "Title: 311 Rat Complaint Submitted" \
             -H "Tags: rat,white_check_mark" \
-            -d "Complaint submitted at $(TZ='America/New_York' date '+%I:%M %p %Z')" \
+            -d "Submitted at $(TZ='America/New_York' date '+%I:%M %p %Z')
+
+          Address: $ADDRESS, $CITY, $STATE $ZIP
+          Problem: Condition Attracting Rodents
+          Additional Details: Garbage
+          Recurring: Yes" \
             "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
 
       - name: Notify failure via ntfy
