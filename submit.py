@@ -501,7 +501,6 @@ def fill_step4_review_and_submit(page, dry_run=False):
     print("Step 4: Review and submit...")
 
     wait_for_network_idle(page)
-    ensure_no_captcha(page)
 
     # Log what's on the review page
     print("  - Reviewing submission details...")
