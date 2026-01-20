@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:portal.311.nyc.gov)",
+      "WebSearch",
+      "Bash(pip install:*)",
+      "Bash(playwright install:*)",
+      "Bash(python submit.py:*)"
+    ]
+  }
+}
