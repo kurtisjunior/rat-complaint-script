@@ -70,6 +70,25 @@ def select_random_description():
     return random.choice(DESCRIPTIONS)
 
 
+def save_submission_details(config, description, nyc_datetime):
+    """Save submission details to a file for notification."""
+    artifacts_dir = Path("artifacts")
+    artifacts_dir.mkdir(exist_ok=True)
+
+    details = f"""Address: {config['address']}, {config['city']}, {config['state']} {config['zip']}
+Location Type: 3+ Family Apt. Building
+Problem Detail: Condition Attracting Rodents
+Additional Details: Garbage
+Date/Time Observed: {nyc_datetime.strftime('%-m/%-d/%Y %-I:%M %p')}
+Recurring: Yes
+
+Description: {description}"""
+
+    details_path = artifacts_dir / "submission_details.txt"
+    details_path.write_text(details)
+    print(f"Submission details saved: {details_path}")
+
+
 def save_debug_artifacts(page, error_name="error"):
     """Save screenshot and HTML on failure to artifacts/ directory."""
     artifacts_dir = Path("artifacts")
@@ -604,6 +623,9 @@ def main():
             fill_step2_where(page, config)
             fill_step3_who(page)
             fill_step4_review_and_submit(page, dry_run=args.dry_run)
+
+            # Save submission details for notification
+            save_submission_details(config, description, nyc_datetime)
 
             print("=" * 60)
             print("SUCCESS: Complaint process completed!")
