@@ -1,13 +1,15 @@
 # NYC 311 Rat Complaint Automation
 
-Manual-triggered submission of rodent complaints to NYC 311 for 333 East 34th Street.
+Automated submission of rodent complaints to NYC 311 for 333 East 34th Street.
 
 ## What it does
 
-- Submits a rat complaint **on demand** via GitHub Actions (manual trigger)
+- Submits a rat complaint **every Wednesday at 12:47pm EST**
+- Also supports **manual trigger** via GitHub Actions
 - Fills out the 4-step form: What → Where → Who → Review
-- Generates a unique description each time using pre-written random variations
+- Generates a unique description each time from pre-written variations
 - Runs anonymously (no contact info required)
+- Sends **ntfy notification** on success or failure
 - Fully automated - no local machine needed
 
 ## Complaint Details
@@ -31,11 +33,16 @@ git commit -m "Initial commit"
 gh repo create rat-complaint --private --push
 ```
 
-### 2. Enable Actions
+### 2. Add ntfy secret
 
-The workflow runs only when you manually trigger it in GitHub Actions.
+1. Go to **Settings → Secrets and variables → Actions**
+2. Click **New repository secret**
+3. Name: `NTFY_TOPIC`, Value: your ntfy topic name
 
-To run: **Actions → Submit Complaint → Run workflow**
+### 3. Run
+
+- **Automatic:** Runs every Wednesday 12-1pm EST
+- **Manual:** Actions → Submit Complaint → Run workflow
 
 ## Files
 
@@ -62,3 +69,31 @@ python submit.py --dry-run
 # Test for real
 python submit.py
 ```
+
+## Roadmap
+
+### Clawd.bot Integration with Photo Support
+
+**Goal:** Send a photo of a rat problem via Telegram/Discord/etc. and have the complaint auto-submit with the image attached.
+
+**Implementation Plan:**
+
+1. **Add `--image` flag to submit.py**
+   - Accept a file path: `python submit.py --image /path/to/rat-photo.jpg`
+   - In Step 1, click "Add Attachment" button and upload the file
+   - Support common formats: jpg, png, heic
+
+2. **Create Clawd.bot skill**
+   ```
+   When I send a photo with "rat complaint" or "311":
+   1. Save the image to /tmp/rat-complaint-{timestamp}.jpg
+   2. Run: python submit.py --image /tmp/rat-complaint-{timestamp}.jpg
+   3. Reply with confirmation number or error
+   ```
+
+3. **Alternative: Direct form filling**
+   - Clawd.bot can browse and fill forms directly
+   - Could skip the script entirely and just instruct Clawd to fill the 311 form
+   - Less reliable but more flexible
+
+**Status:** Not started

@@ -1,11 +1,10 @@
 name: Submit Complaint
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
   schedule:
-    # Every Wednesday at 12pm EST (17:00 UTC)
-    # Note: Adjust to 16:00 UTC during daylight saving time (Mar-Nov)
-    - cron: '0 17 * * 3'
+    # Every Wednesday at 12:47pm EST (17:47 UTC)
+    - cron: '47 17 * * 3'
 
 jobs:
   submit:
@@ -13,21 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Random delay (0-60 minutes)
-        run: |
-          DELAY=$((RANDOM % 3600))
-          echo "Sleeping for $((DELAY / 60)) minutes and $((DELAY % 60)) seconds..."
-          sleep $DELAY
-
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          playwright install chromium
-          playwright install-deps chromium
+          playwright install --with-deps chromium
 
       - name: Submit complaint
         run: python submit.py
@@ -37,19 +31,29 @@ jobs:
           STATE: "NY"
           ZIP: "10016"
 
-      - name: Notify via ntfy
+      - name: Notify success via ntfy
         if: success()
         run: |
           curl -s \
-            -H "Title: NYC 311 Rat Complaint Submitted" \
-            -H "Priority: default" \
-            -H "Tags: rat,nyc,311" \
-            -d "Complaint submitted successfully at $(TZ='America/New_York' date '+%Y-%m-%d %I:%M %p %Z')" \
+            -H "Title: 311 Rat Complaint Submitted" \
+            -H "Tags: rat,white_check_mark" \
+            -d "Complaint submitted at $(TZ='America/New_York' date '+%I:%M %p %Z')" \
             "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
 
-      - name: Upload artifacts on failure
+      - name: Notify failure via ntfy
+        if: failure()
+        run: |
+          curl -s \
+            -H "Title: 311 Rat Complaint Failed" \
+            -H "Tags: rat,x" \
+            -H "Priority: high" \
+            -d "Submission failed at $(TZ='America/New_York' date '+%I:%M %p %Z'). Check workflow artifacts." \
+            "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
+
+      - name: Upload artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: debug-artifacts
-          path: artifacts/
+          name: playwright-artifacts
+          path: artifacts
+          if-no-files-found: ignore
