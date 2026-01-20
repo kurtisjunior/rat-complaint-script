@@ -40,10 +40,10 @@ DESCRIPTIONS = [
 ADDITIONAL_DETAILS = "Trash, Improper garbage storage or disposal, Open lot"
 
 # Default address (can be overridden via environment variables)
-DEFAULT_ADDRESS = "333 East 34th Street"
-DEFAULT_CITY = "New York"
+DEFAULT_ADDRESS = "932 Carroll St"
+DEFAULT_CITY = "Brooklyn"
 DEFAULT_STATE = "NY"
-DEFAULT_ZIP = "10016"
+DEFAULT_ZIP = "11225"
 
 
 def get_config():
