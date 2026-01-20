@@ -25,16 +25,25 @@ FORM_DIRECT_URL = (
 FORM_ARTICLE_URL = "https://portal.311.nyc.gov/article/?kanumber=KA-01107"
 
 DESCRIPTIONS = [
-    "Rats frequently seen running along the building's foundation and near trash areas.",
-    "Multiple rat burrows observed near the property line and sidewalk cracks.",
-    "Rodents spotted entering and exiting holes near the building's basement vents.",
-    "Rat droppings found regularly along the exterior walls and near garbage bins.",
-    "Live rats observed during daylight hours near uncovered trash containers.",
-    "Rodent activity increasing - rats seen nightly foraging near the property.",
-    "Rat holes and runways visible along the building perimeter and adjacent lots.",
-    "Persistent rat infestation with burrows near vegetation and waste areas.",
-    "Rats observed accessing the property through gaps in the building foundation.",
-    "Regular rodent sightings near improperly stored garbage and debris piles.",
+    "Rats are constantly in the front of this building, running in and out of the open garbage. The trash area is a complete mess with overflowing bags and no proper closed bins. I see rats climbing inside the garbage bags daily. The building next door has proper bins with lids and their garbage area is clean - they don't have this problem. This building needs actual closed containers.",
+
+    "There is a severe rat problem at the front of this building due to the garbage situation. The rats are literally inside the open trash bags eating and nesting. The garbage area is filthy and disorganized with nowhere near enough bins, and the ones they have don't close. Meanwhile the neighboring building has enclosed bins and no rat issue. Please inspect and require proper waste management.",
+
+    "Every day I see rats running around the front of this building and going in and out of the exposed garbage. The trash area is disgusting - bags are piled up, bins are overflowing, and nothing is properly covered. The building right next door has their garbage under control with closed bins and I never see rats there. This property needs to be cited for the unsanitary conditions.",
+
+    "The rat infestation at the front of this building is out of control. The rodents are bold enough to climb inside the open garbage in broad daylight. There aren't enough bins and the trash area is always a mess with bags torn open. It's embarrassing because the building next door manages their waste properly with sealed containers and has no visible rat activity. This needs immediate attention.",
+
+    "Rats have taken over the front garbage area of this building. I regularly see them inside the open trash, eating and running around. The waste management here is terrible - not enough bins, no lids, garbage strewn everywhere. The adjacent building has proper enclosed bins and a clean garbage area with no rat problem. This building is creating a health hazard for the entire block.",
+
+    "The front of this building has become a feeding ground for rats due to the deplorable garbage situation. Rats go in and out of the open trash constantly. The bin area is messy, overcrowded, and lacks proper closed containers. Compare this to the building next door which has adequate sealed bins and no rodent issue. The difference is obvious and this property needs to fix their waste storage immediately.",
+
+    "I'm reporting a serious rat problem at the front of this building caused by inadequate garbage management. Rats are seen daily inside the exposed trash bags. The garbage area is in terrible condition with insufficient bins and no covers. The neighboring property has proper closed bins and keeps their area clean - they don't have rats. This building needs to be held accountable.",
+
+    "Rats are infesting the front garbage area of this building. They climb in and out of the open trash bags throughout the day. The waste area is a disaster - messy, overflowing, with not nearly enough enclosed bins. The building next door proves this is fixable - they have proper sealed containers and a clean garbage area with no rat activity. Please require this property to address the sanitation failure.",
+
+    "The rat situation at the front of this building is unacceptable. Rodents are constantly in the open garbage, and the trash area is filthy and disorganized. There are not enough bins and none of them close properly. The building next door has it figured out with adequate closed bins and no rat problem. This property's negligent waste management is attracting vermin to the entire neighborhood.",
+
+    "Reporting ongoing rat activity at the front of this building. The rats are inside the open garbage bags daily - I've seen them crawling in and out numerous times. The garbage area is a mess with overflowing uncovered bins and loose bags everywhere. The adjacent building has proper enclosed bins and maintains a clean waste area with no visible rats. This property needs immediate inspection and enforcement.",
 ]
 
 ADDITIONAL_DETAILS = "Trash, Improper garbage storage or disposal, Open lot"
