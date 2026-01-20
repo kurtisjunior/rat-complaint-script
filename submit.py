@@ -511,10 +511,10 @@ def fill_step4_review_and_submit(page, dry_run=False):
         print("Dry run completed successfully!")
         return True
 
-    # Find and click Submit button
-    submit_button = page.get_by_role("button", name="Submit")
+    # Find and click Submit button (on review page it's "Complete and Submit")
+    submit_button = page.get_by_role("button", name="Complete and Submit")
     if submit_button.count() == 0:
-        submit_button = page.locator("button[type='submit'], input[type='submit']").first
+        submit_button = page.locator("#NextButton.submit-btn, input[value*='Submit']").first
 
     expect(submit_button).to_be_visible(timeout=10000)
     submit_button.click()

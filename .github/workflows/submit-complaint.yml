@@ -26,10 +26,10 @@ jobs:
       - name: Submit complaint
         run: python submit.py
         env:
-          ADDRESS: "333 East 34th Street"
-          CITY: "New York"
+          ADDRESS: "932 Carroll St"
+          CITY: "Brooklyn"
           STATE: "NY"
-          ZIP: "10016"
+          ZIP: "11225"
 
       - name: Notify success via ntfy
         if: success()
