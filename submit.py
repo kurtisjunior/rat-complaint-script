@@ -135,10 +135,18 @@ def get_current_step(page):
 
 def wait_and_click_next(page, expected_next_step=None):
     """Wait for and click the Next/Continue button, then verify step transition."""
-    next_button = page.locator(
-        "button:has-text('Next'), button:has-text('Continue'), "
-        "input[type='submit'][value*='Next'], input[type='submit'][value*='Continue']"
-    ).first
+    # Try multiple selectors for the Next button
+    next_button = page.get_by_role("button", name="Next").first
+    if next_button.count() == 0:
+        next_button = page.get_by_role("button", name="Continue").first
+    if next_button.count() == 0:
+        next_button = page.locator(
+            "button:has-text('Next'), button:has-text('Continue'), "
+            "a:has-text('Next'), a:has-text('Continue'), "
+            "input[type='submit'][value*='Next'], input[type='submit'][value*='Continue'], "
+            "[role='button']:has-text('Next'), [role='button']:has-text('Continue')"
+        ).first
+
     expect(next_button).to_be_visible(timeout=15000)
     next_button.click()
     wait_for_network_idle(page)
