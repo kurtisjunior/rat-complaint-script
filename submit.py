@@ -14,36 +14,29 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from playwright.sync_api import sync_playwright, expect, TimeoutError as PlaywrightTimeout
+from playwright.sync_api import (
+    sync_playwright,
+    expect,
+    TimeoutError as PlaywrightTimeout,
+)
 
 
 # Constants
-FORM_DIRECT_URL = (
-    "https://portal.311.nyc.gov/sr-step/?id=fb797007-e3f3-f011-92b8-7c1e52e6db72&stepid=4a51f5a5-b04c-e811-a835-000d3a33b1e4"
-)
+FORM_DIRECT_URL = "https://portal.311.nyc.gov/sr-step/?id=fb797007-e3f3-f011-92b8-7c1e52e6db72&stepid=4a51f5a5-b04c-e811-a835-000d3a33b1e4"
 # Main Rat or Mouse Complaint article page (fallback)
 FORM_ARTICLE_URL = "https://portal.311.nyc.gov/article/?kanumber=KA-01107"
 
 DESCRIPTIONS = [
-    "Rats are constantly in the front of this building, running in and out of the open garbage. The trash area is a complete mess with overflowing bags and no proper closed bins. I see rats climbing inside the garbage bags daily. The building next door has proper bins with lids and their garbage area is clean - they don't have this problem. This building needs actual closed containers.",
-
-    "There is a severe rat problem at the front of this building due to the garbage situation. The rats are literally inside the open trash bags eating and nesting. The garbage area is filthy and disorganized with nowhere near enough bins, and the ones they have don't close. Meanwhile the neighboring building has enclosed bins and no rat issue. Please inspect and require proper waste management.",
-
-    "Every day I see rats running around the front of this building and going in and out of the exposed garbage. The trash area is disgusting - bags are piled up, bins are overflowing, and nothing is properly covered. The building right next door has their garbage under control with closed bins and I never see rats there. This property needs to be cited for the unsanitary conditions.",
-
-    "The rat infestation at the front of this building is out of control. The rodents are bold enough to climb inside the open garbage in broad daylight. There aren't enough bins and the trash area is always a mess with bags torn open. It's embarrassing because the building next door manages their waste properly with sealed containers and has no visible rat activity. This needs immediate attention.",
-
-    "Rats have taken over the front garbage area of this building. I regularly see them inside the open trash, eating and running around. The waste management here is terrible - not enough bins, no lids, garbage strewn everywhere. The adjacent building has proper enclosed bins and a clean garbage area with no rat problem. This building is creating a health hazard for the entire block.",
-
-    "The front of this building has become a feeding ground for rats due to the deplorable garbage situation. Rats go in and out of the open trash constantly. The bin area is messy, overcrowded, and lacks proper closed containers. Compare this to the building next door which has adequate sealed bins and no rodent issue. The difference is obvious and this property needs to fix their waste storage immediately.",
-
-    "I'm reporting a serious rat problem at the front of this building caused by inadequate garbage management. Rats are seen daily inside the exposed trash bags. The garbage area is in terrible condition with insufficient bins and no covers. The neighboring property has proper closed bins and keeps their area clean - they don't have rats. This building needs to be held accountable.",
-
-    "Rats are infesting the front garbage area of this building. They climb in and out of the open trash bags throughout the day. The waste area is a disaster - messy, overflowing, with not nearly enough enclosed bins. The building next door proves this is fixable - they have proper sealed containers and a clean garbage area with no rat activity. Please require this property to address the sanitation failure.",
-
-    "The rat situation at the front of this building is unacceptable. Rodents are constantly in the open garbage, and the trash area is filthy and disorganized. There are not enough bins and none of them close properly. The building next door has it figured out with adequate closed bins and no rat problem. This property's negligent waste management is attracting vermin to the entire neighborhood.",
-
-    "Reporting ongoing rat activity at the front of this building. The rats are inside the open garbage bags daily - I've seen them crawling in and out numerous times. The garbage area is a mess with overflowing uncovered bins and loose bags everywhere. The adjacent building has proper enclosed bins and maintains a clean waste area with no visible rats. This property needs immediate inspection and enforcement.",
+    "Rats are out in the open every day now. I routinely see 5+ rats sprinting along the sidewalk between the exposed trash area and underneath parked cars, then back to loose trash on the street. The stench from the open garbage is nauseating and the situation is rapidly getting worse.",
+    "This is a blatant and worsening rat infestation. At least 5 rats at a time run in broad daylight from the open trash area, across the sidewalk, and under cars to reach trash left out on the street. The trash area reeks and is completely exposed.",
+    "Rats are now active in the daytime and it is escalating. I see them running the sidewalk like a corridor, darting between the open trash area and trash on the street, then disappearing under cars. They also run into the court area where they sleep.",
+    "The trash is out in the open and the smell is putrid. Multiple rats (often 5+) are visible at once, running between the trash area and the street, crossing the sidewalk and slipping under parked cars. This is getting worse week by week.",
+    "Severe rodent activity: rats are openly running on the sidewalk in daylight. They go back and forth between exposed garbage in the trash area and loose trash on the street, using the space under cars as cover. The court area is now a clear nesting/sleeping spot.",
+    "The garbage area is uncovered, overflowing, and foul-smelling. I regularly observe 5+ rats at a time racing from the trash area across the sidewalk, under cars, and toward trash left on the street. They then run into the court area where they sleep.",
+    "This location has become a disgusting rat runway. In broad daylight, rats run between the open trash area and trash on the street, crossing the sidewalk and ducking under parked cars. The odor is rancid and the infestation is worsening.",
+    "Rats are out in the open and multiplying. I see groups of 5+ running from the exposed trash area to street trash, cutting across the sidewalk and hiding under cars. They also run into the court area where they sleep, and it is getting worse fast.",
+    "The trash is stored out in the open and the smell is overwhelming. Rats are now bold in the daytime, running between the trash area and street trash, crossing the sidewalk and moving under parked cars. The court area has active rat traffic and appears to be where they sleep.",
+    "This is an urgent sanitation hazard. The exposed trash area stinks, and I repeatedly see 5+ rats at once running the sidewalk between the trash area, under cars, and to trash on the street. They retreat into the court area where they sleep, and the problem is worsening.",
 ]
 
 ADDITIONAL_DETAILS = "Trash, Improper garbage storage or disposal, Open lot"
@@ -63,6 +56,7 @@ def get_config():
         "state": os.environ.get("STATE", DEFAULT_STATE),
         "zip": os.environ.get("ZIP", DEFAULT_ZIP),
     }
+
 
 def get_form_url():
     """Get form URL from environment variables with default direct form link."""
@@ -84,11 +78,11 @@ def save_submission_details(config, description, nyc_datetime):
     artifacts_dir = Path("artifacts")
     artifacts_dir.mkdir(exist_ok=True)
 
-    details = f"""Address: {config['address']}, {config['city']}, {config['state']} {config['zip']}
+    details = f"""Address: {config["address"]}, {config["city"]}, {config["state"]} {config["zip"]}
 Location Type: 3+ Family Apt. Building
 Problem Detail: Condition Attracting Rodents
 Additional Details: Garbage
-Date/Time Observed: {nyc_datetime.strftime('%-m/%-d/%Y %-I:%M %p')}
+Date/Time Observed: {nyc_datetime.strftime("%-m/%-d/%Y %-I:%M %p")}
 Recurring: Yes
 
 Description: {description}"""
@@ -139,7 +133,7 @@ def ensure_no_captcha(page):
                 # Check if it's actually visible and has dimensions
                 if captcha_element.is_visible():
                     box = captcha_element.bounding_box()
-                    if box and box['width'] > 50 and box['height'] > 50:
+                    if box and box["width"] > 50 and box["height"] > 50:
                         print("ERROR: CAPTCHA detected. Cannot proceed automatically.")
                         save_debug_artifacts(page, "captcha_detected")
                         raise Exception("CAPTCHA detected")
@@ -159,7 +153,9 @@ def get_current_step(page):
     """Return the current step number (1-4) based on the progress indicator."""
     for step in [1, 2, 3, 4]:
         # Active step typically has a distinct class or aria attribute
-        active = page.locator(f".progress-step.active:has-text('{step}'), [aria-current='step']:has-text('{step}')").first
+        active = page.locator(
+            f".progress-step.active:has-text('{step}'), [aria-current='step']:has-text('{step}')"
+        ).first
         if active.count() > 0:
             return step
     # Fallback: check for step-specific elements
@@ -167,7 +163,12 @@ def get_current_step(page):
         return 1
     if page.locator("#n311_locationtypeid_select").count() > 0:
         return 2
-    if page.locator("fieldset[aria-label*='Contact'], input[id*='firstname']").first.count() > 0:
+    if (
+        page.locator(
+            "fieldset[aria-label*='Contact'], input[id*='firstname']"
+        ).first.count()
+        > 0
+    ):
         return 3
     if page.get_by_role("button", name="Submit").count() > 0:
         return 4
@@ -197,8 +198,12 @@ def wait_and_click_next(page, expected_next_step=None):
         page.wait_for_timeout(1000)
         current = get_current_step(page)
         if current and current != expected_next_step:
-            save_debug_artifacts(page, f"step_transition_failed_expected_{expected_next_step}")
-            raise Exception(f"Step transition failed: expected step {expected_next_step}, got {current}")
+            save_debug_artifacts(
+                page, f"step_transition_failed_expected_{expected_next_step}"
+            )
+            raise Exception(
+                f"Step transition failed: expected step {expected_next_step}, got {current}"
+            )
 
 
 def on_complaint_form(page):
@@ -227,12 +232,16 @@ def navigate_to_complaint_form(page):
 
     # Step 2: Click the "Report rats or conditions that might attract them." button
     # This is a JavaScript button that triggers createServiceRequest()
-    report_button = page.locator("a:has-text('Report rats or conditions that might attract them')").first
+    report_button = page.locator(
+        "a:has-text('Report rats or conditions that might attract them')"
+    ).first
     if report_button.count() == 0:
         # Try alternative - look for any DOHMH rat report button in expanded section
         report_button = page.locator("a.btn:has-text('Report rats')").first
     if report_button.count() == 0:
-        report_button = page.locator("a[onclick*='createServiceRequest']:has-text('Report rats')").first
+        report_button = page.locator(
+            "a[onclick*='createServiceRequest']:has-text('Report rats')"
+        ).first
 
     if report_button.count() > 0:
         expect(report_button).to_be_visible(timeout=10000)
@@ -261,13 +270,19 @@ def fill_step1_what(page, description, nyc_datetime):
     print("  - Selected 'Condition Attracting Rodents'")
 
     # Fill Additional Details dropdown (appears after Problem Detail selection)
-    additional_details = page.locator("select[id*='additionaldetails'], select[id*='additional']").first
+    additional_details = page.locator(
+        "select[id*='additionaldetails'], select[id*='additional']"
+    ).first
     try:
         additional_details.wait_for(state="visible", timeout=5000)
     except PlaywrightTimeout:
         additional_details = None
 
-    if additional_details and additional_details.count() > 0 and additional_details.is_visible():
+    if (
+        additional_details
+        and additional_details.count() > 0
+        and additional_details.is_visible()
+    ):
         # Try preferred options in order (trash/garbage-related for rat complaints)
         preferred_options = [
             ADDITIONAL_DETAILS,
@@ -281,7 +296,11 @@ def fill_step1_what(page, description, nyc_datetime):
         selected = False
         for pref in preferred_options:
             if additional_details.locator(f"option:has-text('{pref}')").count() > 0:
-                additional_details.select_option(label=additional_details.locator(f"option:has-text('{pref}')").first.text_content())
+                additional_details.select_option(
+                    label=additional_details.locator(
+                        f"option:has-text('{pref}')"
+                    ).first.text_content()
+                )
                 print(f"  - Selected Additional Details: {pref}")
                 selected = True
                 break
@@ -301,7 +320,9 @@ def fill_step1_what(page, description, nyc_datetime):
 
     # Set Date/Time Observed (combined field with format M/D/YYYY h:mm A)
     datetime_str = nyc_datetime.strftime("%-m/%-d/%Y %-I:%M %p")
-    datetime_field = page.locator("input[id='n311_datetimeobserved']:visible, input[placeholder*='M/D/YYYY']:visible").first
+    datetime_field = page.locator(
+        "input[id='n311_datetimeobserved']:visible, input[placeholder*='M/D/YYYY']:visible"
+    ).first
     if datetime_field.count() > 0:
         expect(datetime_field).to_be_visible(timeout=5000)
         datetime_field.click()
@@ -311,7 +332,9 @@ def fill_step1_what(page, description, nyc_datetime):
         print(f"  - Set Date/Time Observed: {datetime_str}")
 
     # Select "Yes" for recurring problem
-    recurring_group = page.locator("fieldset:has-text('recurring'), div:has-text('recurring')").first
+    recurring_group = page.locator(
+        "fieldset:has-text('recurring'), div:has-text('recurring')"
+    ).first
     if recurring_group.count() > 0:
         yes_radio = recurring_group.get_by_label("Yes")
     else:
@@ -335,7 +358,7 @@ def fill_step2_where(page, config):
     # Wait for options to be populated in the dropdown
     page.wait_for_function(
         "document.querySelector('#n311_locationtypeid_select option[value]:not([value=\"\"])') !== null",
-        timeout=15000
+        timeout=15000,
     )
     print("  - Location Type options loaded")
 
@@ -372,14 +395,25 @@ def fill_step2_where(page, config):
         try:
             page.wait_for_function(
                 "document.querySelector('#n311_locationdetailid_select option[value]:not([value=\"\"])') !== null",
-                timeout=10000
+                timeout=10000,
             )
             # Try to select appropriate option for building exterior
-            detail_options = ["Exterior", "Outside", "Sidewalk", "Street", "Front", "Building"]
+            detail_options = [
+                "Exterior",
+                "Outside",
+                "Sidewalk",
+                "Street",
+                "Front",
+                "Building",
+            ]
             selected = False
             for opt in detail_options:
                 if location_detail.locator(f"option:has-text('{opt}')").count() > 0:
-                    location_detail.select_option(label=location_detail.locator(f"option:has-text('{opt}')").first.text_content())
+                    location_detail.select_option(
+                        label=location_detail.locator(
+                            f"option:has-text('{opt}')"
+                        ).first.text_content()
+                    )
                     print(f"  - Selected Location Detail: {opt}")
                     selected = True
                     break
@@ -414,8 +448,10 @@ def fill_step2_where(page, config):
         page.wait_for_timeout(500)
 
         # Type address slowly to trigger autocomplete
-        address_text = config['address']
-        modal_input.type(address_text, delay=100)  # Type with delay to trigger autocomplete
+        address_text = config["address"]
+        modal_input.type(
+            address_text, delay=100
+        )  # Type with delay to trigger autocomplete
         print(f"  - Typed address: {address_text}")
         page.wait_for_timeout(1000)  # Wait for autocomplete to react
 
@@ -446,7 +482,9 @@ def fill_step2_where(page, config):
 
             if not selected_suggestion:
                 # Fallback: click the first suggestion
-                first_suggestion = page.locator(".ui-menu-item, .ui-autocomplete li").first
+                first_suggestion = page.locator(
+                    ".ui-menu-item, .ui-autocomplete li"
+                ).first
                 if first_suggestion.count() > 0:
                     first_suggestion.click()
                     wait_for_network_idle(page)
@@ -469,7 +507,7 @@ def fill_step2_where(page, config):
                     const btn = document.querySelector('#SelectAddressMap');
                     return btn && !btn.disabled;
                 }""",
-                timeout=15000
+                timeout=15000,
             )
             print("  - Select Address button enabled")
         except PlaywrightTimeout:
@@ -483,7 +521,9 @@ def fill_step2_where(page, config):
                 # Click in the center of the map
                 box = map_canvas.bounding_box()
                 if box:
-                    page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+                    page.mouse.click(
+                        box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+                    )
                     wait_for_network_idle(page)
                     print("  - Clicked on map center")
                     page.wait_for_timeout(2000)
@@ -497,7 +537,9 @@ def fill_step2_where(page, config):
     except PlaywrightTimeout as e:
         save_debug_artifacts(page, "address_modal_failed")
         # Try to close any open modal by clicking Cancel or X
-        cancel_btn = page.locator("#CancelButton, .modal button[data-dismiss='modal'], .modal .close").first
+        cancel_btn = page.locator(
+            "#CancelButton, .modal button[data-dismiss='modal'], .modal .close"
+        ).first
         if cancel_btn.count() > 0:
             try:
                 cancel_btn.click(timeout=2000)
@@ -541,7 +583,9 @@ def fill_step4_review_and_submit(page, dry_run=False):
     # Find and click Submit button (on review page it's "Complete and Submit")
     submit_button = page.get_by_role("button", name="Complete and Submit")
     if submit_button.count() == 0:
-        submit_button = page.locator("#NextButton.submit-btn, input[value*='Submit']").first
+        submit_button = page.locator(
+            "#NextButton.submit-btn, input[value*='Submit']"
+        ).first
 
     expect(submit_button).to_be_visible(timeout=10000)
     submit_button.click()
@@ -561,7 +605,11 @@ def fill_step4_review_and_submit(page, dry_run=False):
     except PlaywrightTimeout:
         # Check page content as fallback
         page_text = page.content().lower()
-        if "thank you" in page_text or "confirmation" in page_text or "submitted" in page_text:
+        if (
+            "thank you" in page_text
+            or "confirmation" in page_text
+            or "submitted" in page_text
+        ):
             confirmation_found = True
 
     if not confirmation_found:
@@ -603,7 +651,9 @@ def main():
     print("NYC 311 Rat Complaint Automation")
     print("=" * 60)
     print(f"Time (NYC): {nyc_datetime.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-    print(f"Address: {config['address']}, {config['city']}, {config['state']} {config['zip']}")
+    print(
+        f"Address: {config['address']}, {config['city']}, {config['state']} {config['zip']}"
+    )
     print(f"Dry run: {args.dry_run}")
     print("=" * 60)
 
