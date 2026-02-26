@@ -4,7 +4,7 @@ Automated submission of rodent complaints to NYC 311 for 932 Carroll St, Brookly
 
 ## What it does
 
-- Submits a rat complaint **every Wednesday at 12:47pm EST**
+- Submits a rat complaint **every Monday and Wednesday at 12:47pm ET**
 - Also supports **manual trigger** via GitHub Actions
 - Fills out the 4-step form: What → Where → Who → Review
 - Generates a unique description each time from pre-written variations
@@ -18,7 +18,7 @@ Automated submission of rodent complaints to NYC 311 for 932 Carroll St, Brookly
 |-------|-------|
 | Address | 932 Carroll St, Brooklyn, NY 11225 |
 | Problem Detail | Condition Attracting Rodents |
-| Additional Details | Trash is out in the open, the bin area is exposed, it attracts a lot of rats every single day |
+| Additional Details | Trash is out in the open, the trash area reeks, rats are visible in daylight and run across the sidewalk |
 | Date/Time Observed | Auto-generated at submission time |
 | Recurring Problem | Yes |
 
@@ -41,7 +41,7 @@ gh repo create rat-complaint --private --push
 
 ### 3. Run
 
-- **Automatic:** Runs every Wednesday 12-1pm EST
+- **Automatic:** Runs every Monday and Wednesday at `17:47 UTC` (12:47pm EST / 1:47pm EDT)
 - **Manual:** Actions → Submit Complaint → Run workflow
 
 ## Files

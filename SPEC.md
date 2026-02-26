@@ -15,9 +15,13 @@ Build an automated NYC 311 rat complaint submission system that runs on GitHub A
 
 ## Trigger
 
-- **No automatic schedule**
-- Manual trigger only via GitHub Actions `workflow_dispatch`
+- Runs on a schedule via GitHub Actions `schedule` (cron)
+- Also supports manual trigger via GitHub Actions `workflow_dispatch`
 - Must work in GitHub Actions Ubuntu runner environment
+
+Schedule:
+
+- Every Monday and Wednesday at 12:47pm ET (`17:47 UTC`): cron `47 17 * * 1,3`
 
 ---
 
@@ -27,10 +31,10 @@ Provide defaults in code, but allow override via environment variables so the wo
 
 | Input | Default | Source |
 |-------|---------|--------|
-| Address | 333 East 34th Street | env `ADDRESS` |
-| City | New York | env `CITY` |
+| Address | 932 Carroll St | env `ADDRESS` |
+| City | Brooklyn | env `CITY` |
 | State | NY | env `STATE` |
-| Zip | 10016 | env `ZIP` |
+| Zip | 11225 | env `ZIP` |
 | Problem Detail | Condition Attracting Rodents | constant |
 | Additional Details | (see below) | constant |
 | Recurring | Yes | constant |
@@ -47,7 +51,7 @@ Use local time in `America/New_York` for date/time observed.
 | Field | Value |
 |-------|-------|
 | Problem Detail | "Condition Attracting Rodents" (dropdown) |
-| Additional Details | "Trash is out in the open, the bin area is exposed, it attracts a lot of rats every single day" |
+| Additional Details | Selected from the form's dropdown (script attempts a trash/garbage-related option) |
 | Description | Randomly selected from pre-written list (see below) |
 | Date/Time Observed | Auto-generate to current date/time at submission |
 | Is this a recurring problem? | Yes |
@@ -56,10 +60,10 @@ Use local time in `America/New_York` for date/time observed.
 
 | Field | Value |
 |-------|-------|
-| Address | 333 East 34th Street |
-| City | New York |
+| Address | 932 Carroll St |
+| City | Brooklyn |
 | State | NY |
-| Zip | 10016 |
+| Zip | 11225 |
 
 ### Step 3: Who
 
@@ -78,25 +82,16 @@ Each submission randomly selects one description from this list:
 
 ```python
 DESCRIPTIONS = [
-    "The trash area behind this building has become a severe public health hazard. Rats are swarming the exposed bins every single day, and I've counted over a dozen running back and forth across the sidewalk during daylight hours. The bins are completely inadequate—they overflow constantly and food waste is left on the ground. Residents including children and elderly people have to walk past this mess daily. This situation has persisted for months and is getting worse. I'm requesting an immediate inspection and enforcement action.",
-
-    "I'm reporting a serious and ongoing rodent infestation at this address caused by grossly inadequate trash management. The garbage area is completely exposed with no proper containment. Rats have taken over—they're bold enough to run across the sidewalk even when people are walking by. Food scraps are scattered on the ground attracting more vermin daily. This is a clear violation of health codes and poses a disease risk to everyone in the area. Please send an inspector as soon as possible.",
-
-    "This location has a dangerous rat problem that requires urgent attention. The trash situation is out of control—bins are overflowing, lids are missing or broken, and food waste is left exposed on the ground. I see rats every single day, often in groups, running through the garbage area and across the public sidewalk. This is happening in broad daylight, which indicates a severe infestation. The building management has done nothing. I'm asking the city to intervene and enforce proper sanitation standards.",
-
-    "The rodent situation at this building has reached a critical level. The trash area is a complete disaster—there aren't nearly enough bins for the building, garbage overflows onto the ground, and food waste attracts swarms of rats daily. I've personally witnessed rats running across the sidewalk while residents try to enter and exit the building. Children live here and have to walk past this health hazard every day. This needs immediate inspection and the property owner must be held accountable.",
-
-    "I'm filing this complaint because the rat infestation at this address is a genuine public health emergency. The trash management is nonexistent—bins are exposed, overflowing, and surrounded by food waste. Rats are everywhere. They run across the sidewalk constantly, sometimes in groups of four or five at a time. I've seen them during morning, afternoon, and evening hours. This isn't just unpleasant—it's a disease vector in a residential area. Please prioritize this for inspection.",
-
-    "The garbage area at this building is creating a massive rat problem that affects the entire block. There are not enough bins, they're always overflowing, and food is scattered on the ground. Rats swarm the area daily and run freely across the sidewalk. I've lived in NYC for years and this is the worst rodent situation I've ever seen. Elderly residents are afraid to take out their trash. This requires immediate enforcement action against the property owner.",
-
-    "Reporting an ongoing health code violation due to severe rodent activity. The trash area is completely exposed and poorly maintained—bins overflow regularly, food waste accumulates on the ground, and rats have infested the area. They run back and forth across the public sidewalk at all hours of the day. This building is in a residential neighborhood with families and children. The unsanitary conditions are unacceptable and the city needs to take action to protect public health.",
-
-    "This address has a persistent rat problem caused by negligent trash management. The bin area is totally exposed with no covers or containment. Garbage overflows constantly and attracts rodents in large numbers. I observe rats running across the sidewalk every single day—sometimes multiple times per day. This has been going on for months with no improvement. The property owner is clearly not maintaining proper sanitation. Please inspect and issue violations as necessary.",
-
-    "The rat infestation at this location is severe and requires immediate city intervention. The root cause is obvious: the trash area is a mess. Bins are inadequate and always overflowing. Food waste is left on the ground. There's no proper containment system. As a result, rats swarm the area daily and run across the sidewalk where residents and pedestrians walk. This is a clear health hazard in a populated area. I'm requesting inspection, enforcement, and follow-up to ensure the problem is resolved.",
-
-    "I'm reporting a serious sanitation issue causing a major rat infestation. The building's trash area is completely exposed and poorly managed. There aren't enough bins, they're constantly overflowing, and food scraps litter the ground. Rats are active throughout the day—I see them running across the sidewalk regularly, sometimes within feet of people walking by. This is disgusting and dangerous. The property needs to be inspected and the owner needs to be required to fix the trash situation immediately.",
+    "Rats are out in the open every day now. I routinely see 5+ rats sprinting along the sidewalk between the exposed trash area and underneath parked cars, then back to loose trash on the street. The stench from the open garbage is nauseating and the situation is rapidly getting worse.",
+    "This is a blatant and worsening rat infestation. At least 5 rats at a time run in broad daylight from the open trash area, across the sidewalk, and under cars to reach trash left out on the street. The trash area reeks and is completely exposed.",
+    "Rats are now active in the daytime and it is escalating. I see them running the sidewalk like a corridor, darting between the open trash area and trash on the street, then disappearing under cars. They also run into the court area where they sleep.",
+    "The trash is out in the open and the smell is putrid. Multiple rats (often 5+) are visible at once, running between the trash area and the street, crossing the sidewalk and slipping under parked cars. This is getting worse week by week.",
+    "Severe rodent activity: rats are openly running on the sidewalk in daylight. They go back and forth between exposed garbage in the trash area and loose trash on the street, using the space under cars as cover. The court area is now a clear nesting/sleeping spot.",
+    "The garbage area is uncovered, overflowing, and foul-smelling. I regularly observe 5+ rats at a time racing from the trash area across the sidewalk, under cars, and toward trash left on the street. They then run into the court area where they sleep.",
+    "This location has become a disgusting rat runway. In broad daylight, rats run between the open trash area and trash on the street, crossing the sidewalk and ducking under parked cars. The odor is rancid and the infestation is worsening.",
+    "Rats are out in the open and multiplying. I see groups of 5+ running from the exposed trash area to street trash, cutting across the sidewalk and hiding under cars. They also run into the court area where they sleep, and it is getting worse fast.",
+    "The trash is stored out in the open and the smell is overwhelming. Rats are now bold in the daytime, running between the trash area and street trash, crossing the sidewalk and moving under parked cars. The court area has active rat traffic and appears to be where they sleep.",
+    "This is an urgent sanitation hazard. The exposed trash area stinks, and I repeatedly see 5+ rats at once running the sidewalk between the trash area, under cars, and to trash on the street. They retreat into the court area where they sleep, and the problem is worsening.",
 ]
 ```
 
