@@ -4,7 +4,7 @@ Automated submission of rodent complaints to NYC 311 for 932 Carroll St, Brookly
 
 ## What it does
 
-- Submits a rat complaint **every Monday and Wednesday at 12:47pm ET**
+- Submits a rat complaint **Monday, Wednesday, and Thursday at one random time between 11:00am and 3:00pm ET**
 - Also supports **manual trigger** via GitHub Actions
 - Fills out the 4-step form: What → Where → Who → Review
 - Generates a unique description each time from pre-written variations
@@ -41,7 +41,7 @@ gh repo create rat-complaint --private --push
 
 ### 3. Run
 
-- **Automatic:** Runs every Monday and Wednesday at `17:47 UTC` (12:47pm EST / 1:47pm EDT)
+- **Automatic:** Checks every 15 minutes on Monday/Wednesday/Thursday and submits once per day at a deterministic random slot between 11:00am and 3:00pm ET
 - **Manual:** Actions → Submit Complaint → Run workflow
 
 ## Files

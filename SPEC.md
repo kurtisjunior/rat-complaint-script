@@ -21,7 +21,7 @@ Build an automated NYC 311 rat complaint submission system that runs on GitHub A
 
 Schedule:
 
-- Every Monday and Wednesday at 12:47pm ET (`17:47 UTC`): cron `47 17 * * 1,3`
+- Every Monday, Wednesday, and Thursday at one random time between 11:00am and 3:00pm ET
 
 ---
 
@@ -78,7 +78,7 @@ Use local time in `America/New_York` for date/time observed.
 
 ## Description Variations
 
-Each submission randomly selects one description from this list:
+Each submission randomly selects one description from a pre-written list with stronger tenant-rights and enforcement-focused language.
 
 ```python
 DESCRIPTIONS = [
