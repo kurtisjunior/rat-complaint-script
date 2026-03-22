@@ -27,18 +27,18 @@ FORM_DIRECT_URL = "https://portal.311.nyc.gov/sr-step/?id=fb797007-e3f3-f011-92b
 FORM_ARTICLE_URL = "https://portal.311.nyc.gov/article/?kanumber=KA-01107"
 
 DESCRIPTIONS = [
-    "This is a severe and recurring rat infestation at a residential rental building. I regularly observe 5+ rats in daylight moving from exposed garbage, across the sidewalk, and under parked cars. These are unsafe and unsanitary conditions that violate tenants' right to habitable, pest-free housing.",
-    "Open and improperly stored trash is attracting rats every day. Multiple rats are visible at once, including in daytime, moving between the building trash area and loose street garbage. This appears to be ongoing owner noncompliance with obligations to keep the premises clean and free from vermin.",
-    "Rats are now active in broad daylight and the infestation is getting worse week after week. Strong odor from uncovered waste and visible rat traffic through pedestrian areas create a serious health and safety risk. Please inspect and issue violations requiring immediate abatement.",
-    "This is not a one-time sighting. At least 5 rats are often seen at once running between exposed waste, the sidewalk, and under cars for cover. The property is being maintained in a way that attracts vermin and interferes with safe use of the building and surrounding area.",
-    "Recurring rodent activity at this location is obvious and severe. Rats are repeatedly observed in daytime due to chronic garbage mismanagement and unsanitary conditions. Request prompt inspection, enforcement, correction deadlines, and reinspection to confirm compliance.",
-    "The infestation appears longstanding and unaddressed. I consistently observe rats traveling between trash sources and shelter points near the building and court area. These conditions undermine basic tenant habitability protections and require immediate corrective action.",
-    "Rats are visibly running across the public sidewalk in daylight because garbage is left exposed and improperly contained. This is a continuing sanitation failure at a residential property. Please document all violations and require full remediation without delay.",
-    "The premises presents a serious vermin hazard to residents and passersby. I repeatedly see groups of rats moving between waste piles, parked cars, and court-area shelter. Conditions remain uncorrected despite recurring exposure and warrant strong enforcement.",
-    "This complaint concerns chronic conditions attracting rodents, not isolated rat sightings. Multiple rats are present at once and active during daytime hours. The owner should be required to eliminate vermin-attracting conditions and maintain lawful sanitary standards.",
-    "Sustained rat activity is occurring at this residential site due to exposed refuse and poor sanitation control. Rats cross pedestrian paths and gather near parked cars and the court area. Please inspect immediately, issue applicable violations, and verify complete abatement.",
-    "I regularly observe large rat activity at this building, including daytime movement across the sidewalk from open garbage storage. The condition is dangerous, foul, and worsening. This should be treated as an urgent enforcement matter to protect tenant health and safety.",
-    "This location has become an active rat corridor tied to improper refuse handling. Rats are visible in groups and move between open trash and nearby shelter points daily. The ongoing failure to correct these conditions appears inconsistent with housing and sanitation requirements.",
+    "This is a serious public health hazard. Rats are active in daylight and I now see more rats than before, including groups moving across the sidewalk. Trash is consistently left open with no secure bins or tight lids, which keeps feeding the infestation. This problem is not self-correcting and needs inspection and enforcement.",
+    "Rodent activity is escalating week by week and is now visible during daytime pedestrian hours. Garbage is routinely exposed, with no covered containers to block access. Rat urine and droppings create a contamination risk for residents and passersby. Please inspect and require proper lidded, rodent-resistant bins.",
+    "This is not an isolated sighting; the infestation is worsening over time. Multiple rats run between open trash, parked cars, and the sidewalk in daylight. There are no consistently covered bins, so food sources remain available every day. Without enforcement, this will continue to get worse.",
+    "Open garbage and lack of covered bins are driving a growing rat population at this address. I regularly observe daytime rat traffic where people walk, and sightings are increasing. These unsanitary conditions present an ongoing health hazard and contamination concern. Please issue corrective violations and follow-up enforcement.",
+    "Rats are now common in broad daylight at this location, and numbers have increased. Trash is repeatedly left uncovered, with no reliable lids or sealed containers. Conditions that attract rodents are ongoing and will not improve on their own. Request immediate inspection and required sanitation correction.",
+    "The property has a persistent and worsening rat problem tied to exposed refuse. Garbage is left open and unsecured, with insufficient covered bins to contain waste. Daytime rat movement on the sidewalk creates a direct public health concern. Please inspect and compel compliant containerized trash storage.",
+    "I continue to see more rats over time, including several at once during the day. The trash area is always open and there are no consistently lidded bins to prevent access. This creates chronic unsanitary conditions and a health hazard for tenants and neighbors. Please enforce immediate abatement and reinspection.",
+    "This infestation is getting worse, not better. Rats are active in daylight and crossing pedestrian paths because trash remains exposed. No proper covered bins are being maintained, so attractants remain in place. A formal inspection and enforcement action are needed to stop continued rat activity.",
+    "There is a recurring rat infestation with increasing sightings and visible daytime activity. Waste is not stored in secure, tightly covered containers, and open trash is present daily. These conditions support rat breeding and ongoing contamination risk. Please issue corrective orders and verify compliance after abatement.",
+    "Rat activity has increased from recurring to severe, with regular daytime sightings near the building and street. Trash is persistently open and not containerized with tight-fitting lids. This is an active sanitation and health hazard that will not resolve without intervention. Request urgent inspection and enforcement.",
+    "This location functions like a rat corridor because food waste is left accessible. I see more rats now than in prior months, including daytime movement under cars and across the sidewalk. With no reliable covered bins, the source conditions remain unchanged. Please inspect promptly and require sustained corrective action.",
+    "The infestation is worsening due to chronic open-trash conditions and lack of secure lidded bins. Rats are visible in daylight where children and pedestrians pass. Rodent droppings and urine create an ongoing health and sanitation risk. Please document violations, require covered container use, and schedule reinspection.",
 ]
 
 ADDITIONAL_DETAILS = "Trash, Improper garbage storage or disposal, Open lot"
@@ -48,6 +48,23 @@ DEFAULT_ADDRESS = "932 Carroll St"
 DEFAULT_CITY = "Brooklyn"
 DEFAULT_STATE = "NY"
 DEFAULT_ZIP = "11225"
+DEFAULT_CONTACT_FIRST_NAME = "Kurtis"
+DEFAULT_CONTACT_LAST_NAME = "Angell"
+DEFAULT_CONTACT_EMAIL = "kurtisangell@gmail.com"
+DEFAULT_CONTACT_ADDRESS_LINE1 = "932 Carroll ST APT 1F"
+DEFAULT_CONTACT_ADDRESS_LINE2 = ""
+DEFAULT_CONTACT_CITY = "New York"
+DEFAULT_CONTACT_STATE = "NY"
+DEFAULT_CONTACT_ZIP = "11225"
+DEFAULT_CONTACT_COUNTRY = "United States"
+
+
+def normalize_us_zip(zip_code):
+    """Normalize ZIP code to first 5 digits when possible."""
+    digits = "".join(ch for ch in zip_code if ch.isdigit())
+    if len(digits) >= 5:
+        return digits[:5]
+    return zip_code.strip()
 
 
 def get_config():
@@ -57,6 +74,25 @@ def get_config():
         "city": os.environ.get("CITY", DEFAULT_CITY),
         "state": os.environ.get("STATE", DEFAULT_STATE),
         "zip": os.environ.get("ZIP", DEFAULT_ZIP),
+        "contact_first_name": os.environ.get(
+            "CONTACT_FIRST_NAME", DEFAULT_CONTACT_FIRST_NAME
+        ),
+        "contact_last_name": os.environ.get(
+            "CONTACT_LAST_NAME", DEFAULT_CONTACT_LAST_NAME
+        ),
+        "contact_email": os.environ.get("CONTACT_EMAIL", DEFAULT_CONTACT_EMAIL),
+        "contact_address_line1": os.environ.get(
+            "CONTACT_ADDRESS_LINE1", DEFAULT_CONTACT_ADDRESS_LINE1
+        ),
+        "contact_address_line2": os.environ.get(
+            "CONTACT_ADDRESS_LINE2", DEFAULT_CONTACT_ADDRESS_LINE2
+        ),
+        "contact_city": os.environ.get("CONTACT_CITY", DEFAULT_CONTACT_CITY),
+        "contact_state": os.environ.get("CONTACT_STATE", DEFAULT_CONTACT_STATE),
+        "contact_zip": normalize_us_zip(
+            os.environ.get("CONTACT_ZIP", DEFAULT_CONTACT_ZIP)
+        ),
+        "contact_country": os.environ.get("CONTACT_COUNTRY", DEFAULT_CONTACT_COUNTRY),
     }
 
 
@@ -86,6 +122,9 @@ Problem Detail: Condition Attracting Rodents
 Additional Details: Garbage
 Date/Time Observed: {nyc_datetime.strftime("%-m/%-d/%Y %-I:%M %p")}
 Recurring: Yes
+Contact Name: {config["contact_first_name"]} {config["contact_last_name"]}
+Contact Email: {config["contact_email"]}
+Contact Address: {config["contact_address_line1"]}, {config["contact_city"]}, {config["contact_state"]} {config["contact_zip"]}
 
 Description: {description}"""
 
@@ -556,13 +595,113 @@ def fill_step2_where(page, config):
     print("Step 2 complete.")
 
 
-def fill_step3_who(page):
-    """Step 3: Handle contact information (leave empty for anonymous)."""
-    print("Step 3: Skipping contact info (anonymous submission)...")
+def fill_step3_who(page, config):
+    """Step 3: Fill contact information."""
+    print("Step 3: Filling contact info...")
 
     wait_for_network_idle(page)
 
-    # Leave all fields empty - anonymous submission is allowed per spec
+    def fill_visible_field(field_name, selectors, value):
+        """Fill the first visible matching field."""
+        if not value:
+            return False
+
+        for selector in selectors:
+            locator = page.locator(selector)
+            count = locator.count()
+            for i in range(count):
+                candidate = locator.nth(i)
+                try:
+                    if candidate.is_visible():
+                        candidate.fill(value)
+                        print(f"  - Filled {field_name}: {value}")
+                        return True
+                except Exception:
+                    continue
+        return False
+
+    fill_visible_field(
+        "Contact First Name",
+        [
+            "input#n311_portaldobcontactfirstname:visible",
+            "input[id*='contactfirstname']:visible",
+            "input[id*='firstname']:visible",
+        ],
+        config["contact_first_name"],
+    )
+    fill_visible_field(
+        "Contact Last Name",
+        [
+            "input#n311_portaldobcontactlastname:visible",
+            "input[id*='contactlastname']:visible",
+            "input[id*='lastname']:visible",
+        ],
+        config["contact_last_name"],
+    )
+    fill_visible_field(
+        "Contact Email",
+        [
+            "input#n311_contactemail:visible",
+            "input[id*='contactemail']:visible",
+            "input[type='email']:visible",
+            "input[id*='email']:visible",
+        ],
+        config["contact_email"],
+    )
+    fill_visible_field(
+        "Contact Address Line 1",
+        [
+            "input#n311_portalcustomeraddressline1:visible",
+            "input[id*='addressline1']:visible",
+        ],
+        config["contact_address_line1"],
+    )
+    if config["contact_address_line2"]:
+        fill_visible_field(
+            "Contact Address Line 2",
+            [
+                "input#n311_portalcustomeraddressline2:visible",
+                "input[id*='addressline2']:visible",
+            ],
+            config["contact_address_line2"],
+        )
+    fill_visible_field(
+        "Contact City",
+        [
+            "input#n311_portalcustomeraddresscity:visible",
+            "input[id*='addresscity']:visible",
+            "input[id*='city']:visible",
+        ],
+        config["contact_city"],
+    )
+    fill_visible_field(
+        "Contact State",
+        [
+            "input#n311_portalcustomeraddressstate:visible",
+            "input[id*='addressstate']:visible",
+            "input[id*='state']:visible",
+        ],
+        config["contact_state"],
+    )
+    fill_visible_field(
+        "Contact ZIP",
+        [
+            "input#n311_portalcustomeraddresszip:visible",
+            "input[id*='addresszip']:visible",
+            "input[id*='zip']:visible",
+            "input[id*='postal']:visible",
+        ],
+        config["contact_zip"],
+    )
+    # Country is optional on many forms; fill when an input exists.
+    fill_visible_field(
+        "Contact Country",
+        [
+            "input[id*='country']:visible",
+        ],
+        config["contact_country"],
+    )
+
     # Click Next and verify we reach Step 4 (Review)
     wait_and_click_next(page, expected_next_step=4)
     print("Step 3 complete.")
@@ -682,7 +821,7 @@ def main():
             # Execute form steps
             fill_step1_what(page, description, nyc_datetime)
             fill_step2_where(page, config)
-            fill_step3_who(page)
+            fill_step3_who(page, config)
             fill_step4_review_and_submit(page, dry_run=args.dry_run)
 
             # Save submission details for notification
