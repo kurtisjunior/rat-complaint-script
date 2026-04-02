@@ -71,6 +71,29 @@ jobs:
           STATE: "NY"
           ZIP: "11225"
 
+      - name: Publish submitted details to run logs and summary
+        if: always() && (github.event_name == 'workflow_dispatch' || env.SHOULD_RUN == 'true')
+        run: |
+          if [ -f artifacts/submission_details.txt ]; then
+            echo "===== Submission Details ====="
+            cat artifacts/submission_details.txt
+            echo "=============================="
+            {
+              echo "## Submission Details"
+              echo
+              echo '```'
+              cat artifacts/submission_details.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "submission_details.txt not found (run likely failed before final submission details were saved)."
+            {
+              echo "## Submission Details"
+              echo
+              echo "No submission details file was generated in this run."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Notify success via ntfy
         if: success() && (github.event_name == 'workflow_dispatch' || env.SHOULD_RUN == 'true')
         run: |
@@ -91,7 +114,7 @@ jobs:
             "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
 
       - name: Upload artifacts
-        if: failure() && (github.event_name == 'workflow_dispatch' || env.SHOULD_RUN == 'true')
+        if: always() && (github.event_name == 'workflow_dispatch' || env.SHOULD_RUN == 'true')
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts
